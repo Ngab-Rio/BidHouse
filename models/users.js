@@ -2,7 +2,7 @@ const db = require("../utils/db")
 
 class UsersModel {
     static async findAll() {
-        const q = `SELECT id, username, role, created_at FROM users`
+        const q = `SELECT * FROM users`
         const res = await db.query(q)
         return res.rows
     }

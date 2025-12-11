@@ -2,6 +2,8 @@ const express = require("express")
 const dotenv = require("dotenv")
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
+const AuthMiddleware = require('./middlewares/verify')
+
 dotenv.config()
 const app = express()
 
@@ -36,6 +38,7 @@ app.get("/", (req, res) => {
 })
 
 app.use("/api/auth", require("./routes/auth"))
+app.use("/api/users", AuthMiddleware.verifyToken, AuthMiddleware.verifyLevel, require("./routes/users"))
 
 app.listen(port, () => {
     console.log(`[+] Server Berjalan di http://${host}:${port}`)

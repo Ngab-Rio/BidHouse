@@ -1,0 +1,39 @@
+services:
+  bid-house:
+    container_name: bid-house
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "${PORT}:${PORT}"
+    networks:
+      - bid-house-networks
+
+  db-bid-house:
+    image: postgres:17.2
+    container_name: db-bid-house
+    restart: unless-stopped
+    ports:
+      - "5439:5432"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASS}
+      POSTGRES_DB: ${DB_NAME}
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - bid-house-storage:/var/lib/postgresql/data
+      - ./db:/docker-entrypoint-initdb.d/
+    networks:
+      - bid-house-networks
+
+volumes:
+  bid-house-storage:
+  
+networks:
+  bid-house-networks:
+    driver: bridge

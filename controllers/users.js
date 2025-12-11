@@ -1,4 +1,4 @@
-const UsersModel = require("../models/users")
+const { UsersModel } = require("../models/users")
 const { validateRequired, isMinLength } = require("../utils/validate")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")

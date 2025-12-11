@@ -1,4 +1,4 @@
-const UsersModel = require("../models/users")
+const { UsersModel } = require("../models/users")
 const { validateRequired, isMinLength } = require("../utils/validate")
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
@@ -7,9 +7,9 @@ class AuthController {
     static async registerUser(req, res){
         try {
             const { username, password } = req.body
-            const missingField = validateRequired(req.body, ["username", "password"])
+            const missingFields = validateRequired(req.body, ["username", "password"])
 
-            if (missingField.length > 0){
+            if (missingFields.length > 0){
                 return res.status(400).json({
                     message: "Field Wajib diisi",
                     missing: missingFields
@@ -63,9 +63,18 @@ class AuthController {
                 })
             }
 
-            const user = (await UsersModel.findByName(username))[0]
+
+            const result = await UsersModel.findByName(username)
+            const user = result[0]
+
+            if (!user) {
+                return res.status(400).json({
+                    message: "username atau password salah"
+                })
+            }
+
             const isMatch = await bcrypt.compare(password, user.password_hash)
-            if (!user || !isMatch){
+            if (!isMatch){
                 return res.status(400).json({
                     message: "username atau password salah"
                 })

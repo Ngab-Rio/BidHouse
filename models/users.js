@@ -54,4 +54,4 @@ class UsersModel {
     }
 }
 
-module.exports = UsersModel
+module.exports = { UsersModel }

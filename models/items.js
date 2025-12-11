@@ -64,30 +64,34 @@ class ItemsModel {
         const res = await db.query(q, values)
         return res.rows[0]
     }
-    
-    static async closeItem(itemID) {
-        const resItem = await db.query(
-            `UPDATE items SET status='closed' WHERE id=$1 RETURNING *`,
-            [itemID]
-        )
-    
-        const item = resItem.rows[0]
-        if (!item) return null
-    
+
+    static async closeItem(itemID){
         const highest = await BidsModel.getHighestBid(itemID)
-    
-        if (highest) {
-            const resWinner = await db.query(
-                `UPDATE items
-                 SET winner_id=$1, winner_name=$2, final_price=$3
-                 WHERE id=$4
-                 RETURNING *`,
-                [highest.user_id, highest.username, highest.amount, itemID]
+
+        if (!highest) {
+            const res = await db.query(
+                `UPDATE items SET status='closed' WHERE id=$1 RETURNING *`,
+                [itemID]
             )
-            return resWinner.rows[0]
+            return res.rows[0]
         }
-    
-        return item
+
+        const winnerID = highest.user_id
+        const winnerName = highest.username
+        const finalPrice = highest.amount
+
+        const res = await db.query(
+            `UPDATE items
+             SET status='closed',
+                 winner_id=$1,
+                 winner_name=$2,
+                 final_price=$3
+             WHERE id=$4
+             RETURNING *`,
+            [winnerID, winnerName, finalPrice, itemID]
+        )
+
+        return res.rows[0]
     }
     
     static async activateItem(itemID) {
@@ -114,6 +118,24 @@ class ItemsModel {
         const res = await db.query(q)
         return res.rows
     }
+
+    static async updateExpiredItems() {
+        const now = new Date()
+        const res = await db.query(
+            `SELECT id FROM items WHERE status='active' AND end_at < $1`,
+            [now]
+        )
+
+        const closedItems = []
+        for (let item of res.rows) {
+            const closed = await this.closeItem(item.id)
+            closedItems.push(closed)
+        }
+
+        return closedItems
+    }
+
+
 }
 
 module.exports = { ItemsModel }

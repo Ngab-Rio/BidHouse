@@ -1,0 +1,5 @@
+1. Link Repo GitHub
+- https://github.com/Ngab-Rio/BidHouse.git
+
+2. Link Domain Publik API
+- https://bidhouse.ngabrio.my.id/api/

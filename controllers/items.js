@@ -15,9 +15,10 @@ class ItemsController{
                 })
             }
 
-            await ItemsModel.createItems({ title_item, description, start_price, min_increment, start_at, end_at, created_by })
+            const newItem = await ItemsModel.createItems({ title_item, description, start_price, min_increment, start_at, end_at, created_by })
             return res.status(200).json({
                 message: "Buat item baru berhasil",
+                data: newItem
             })
         } catch (error) {
             console.error("Create Item:", error)
@@ -30,6 +31,7 @@ class ItemsController{
 
     static async getAllItems(req, res){
         try {
+            await ItemsModel.updateExpiredItems()
             const items = await ItemsModel.getAllItems()
             return res.status(200).json({
                 message: "Get All Items",
@@ -46,6 +48,8 @@ class ItemsController{
 
     static async getItemByID(req, res){
         try {
+
+
             const { itemID } = req.params
             const item = await ItemsModel.getItemByID(itemID)
             if (!item){

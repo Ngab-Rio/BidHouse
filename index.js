@@ -7,6 +7,8 @@ const AuthMiddleware = require('./middlewares/verify')
 dotenv.config()
 const app = express()
 
+require('./cron/updateExpiredItems')
+
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

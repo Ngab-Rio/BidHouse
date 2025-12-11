@@ -48,7 +48,6 @@ jobs:
             SERVICE_NAME="${{ secrets.BID_HOUSE }}"
 
             echo ">>> Masuk ke project directory..."
-            cd $PROJECT_DIR
 
             echo ">>> Pull latest code..."
             if [ ! -d "BidHouse" ]; then
@@ -60,6 +59,7 @@ jobs:
                 git clean -fd
                 cd ..
             fi
+            cd $PROJECT_DIR/BidHouse
 
             echo ">>> Pastikan .env ada..."
             if [ ! -f ".env" ]; then

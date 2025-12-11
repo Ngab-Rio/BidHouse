@@ -96,6 +96,13 @@ class UsersController{
                 })
             }
 
+            const existUser = await UsersModel.findByName(username)
+            if(existUser.length > 0){
+                return res.status(400).json({
+                    message: "Username sudah ada"
+                })
+            }
+
             if(!isMinLength(password, 8)){
                 return res.status(400).json({
                     message: "Password harus lebih dari 8 karakter"

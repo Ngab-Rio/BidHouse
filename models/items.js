@@ -1,4 +1,5 @@
 const db = require("../utils/db")
+const { BidsModel } = require("./bids")
 
 class ItemsModel {
     static async createItems({
@@ -31,10 +32,18 @@ class ItemsModel {
     static async getItemByID(itemID){
         const q = `SELECT * FROM items WHERE id=$1`
         const res = await db.query(q, [itemID])
-        return res.rows[0]
+
+        if (res.rows.length === 0) return null
+        const item = res.rows[0]
+        return {
+            ...item,
+            start_price: Number(item.start_price),
+            min_increment: Number(item.min_increment)
+        }
     }
 
     static async deleteItem(id) {
+        await db.query(`DELETE FROM bids WHERE item_id=$1`, [id])
         const res = await db.query(`DELETE FROM items WHERE id=$1 RETURNING *`, [id])
         return res.rows
     }
@@ -55,21 +64,55 @@ class ItemsModel {
         const res = await db.query(q, values)
         return res.rows[0]
     }
-
+    
     static async closeItem(itemID) {
-        const res = await db.query(
-            `UPDATE items SET status = 'closed' WHERE id = $1 RETURNING *`,
+        const resItem = await db.query(
+            `UPDATE items SET status='closed' WHERE id=$1 RETURNING *`,
             [itemID]
         )
-        return res.rows[0]
+    
+        const item = resItem.rows[0]
+        if (!item) return null
+    
+        const highest = await BidsModel.getHighestBid(itemID)
+    
+        if (highest) {
+            const resWinner = await db.query(
+                `UPDATE items
+                 SET winner_id=$1, winner_name=$2, final_price=$3
+                 WHERE id=$4
+                 RETURNING *`,
+                [highest.user_id, highest.username, highest.amount, itemID]
+            )
+            return resWinner.rows[0]
+        }
+    
+        return item
     }
-
+    
     static async activateItem(itemID) {
         const res = await db.query(
             `UPDATE items SET status = 'active' WHERE id = $1 RETURNING *`,
             [itemID]
         )
         return res.rows[0]
+    }
+
+    static async getWinnersAll(){
+        const q = `
+            SELECT 
+                id AS item_id,
+                title_item,
+                winner_id,
+                winner_name,
+                final_price,
+                end_at
+            FROM items
+            WHERE status = 'closed' AND winner_id IS NOT NULL
+            ORDER BY end_at DESC
+        `
+        const res = await db.query(q)
+        return res.rows
     }
 }
 

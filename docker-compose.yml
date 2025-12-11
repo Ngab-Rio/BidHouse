@@ -25,6 +25,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASS}
       POSTGRES_DB: ${DB_NAME}
       PGDATA: /var/lib/postgresql/data
+      TZ: Asia/Jakarta
     volumes:
       - bid-house-storage:/var/lib/postgresql/data
       - ./db:/docker-entrypoint-initdb.d/

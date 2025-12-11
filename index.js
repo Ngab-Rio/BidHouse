@@ -40,6 +40,8 @@ app.get("/", (req, res) => {
 app.use("/api/auth", require("./routes/auth"))
 app.use("/api/users", AuthMiddleware.verifyToken, AuthMiddleware.verifyLevel, require("./routes/users"))
 app.use("/api/items", AuthMiddleware.verifyToken, require("./routes/items"))
+app.use("/api/bids", require("./routes/bids"))
+app.use("/api/winner", require("./routes/winner"))
 
 app.listen(port, () => {
     console.log(`[+] Server Berjalan di http://${host}:${port}`)

@@ -131,28 +131,96 @@ class ItemsController{
     static async closeItem(req, res) {
         try {
             const { itemID } = req.params
+            
+            const item = await ItemsModel.getItemByID(itemID)
+            if (!item){
+                return res.status(404).json({
+                    message: `Item dengan id ${itemID} tidak ditemukan`
+                })
+            }
+            
             const updated = await ItemsModel.closeItem(itemID)
-
+            const { winner_id, winner_name, final_price, ...itemData } = updated
             return res.status(200).json({
                 message: "Item berhasil ditutup",
-                item: updated
+                data: itemData
             })
         } catch (error) {
-            return res.status(500).json({ error: error.message })
+            return res.status(500).json({
+                message: "Internal Server Error",
+                error: error.message
+            })        
         }
     }
 
     static async activateItem(req, res) {
         try {
             const { itemID } = req.params
+            const item = await ItemsModel.getItemByID(itemID)
+            if (!item){
+                return res.status(404).json({
+                    message: `Item dengan id ${itemID} tidak ditemukan`
+                })
+            }
             const updated = await ItemsModel.activateItem(itemID)
-
             return res.status(200).json({
                 message: "Item berhasil diaktifkan",
                 item: updated
             })
         } catch (error) {
-            return res.status(500).json({ error: error.message })
+            return res.status(500).json({
+                message: "Internal Server Error",
+                error: error.message
+            })        
+        }
+    }
+
+    static async getWinnerByItemID(req, res){
+        try {
+            const { itemID } = req.params
+            const item = await ItemsModel.getItemByID(itemID)
+
+            if (!item) {
+                return res.status(404).json({
+                    message: `Item dengan id ${itemID} tidak ditemukan`
+                })
+            }
+
+            if (!item.winner_id) {
+                return res.status(200).json({
+                    message: "Belum ada pemenang untuk item ini",
+                    winner: null
+                })
+            }
+
+            return res.status(200).json({
+                message: `Pemenang dari itemID ${itemID}`,
+                winner: {
+                    userID: item.winner_id,
+                    username: item.winner_name,
+                    finalPrice: item.final_price
+                }
+            })
+        } catch (error) {
+            return res.status(500).json({
+                message: "Internal Server Error",
+                error: error.message
+            })
+        }
+    }
+
+    static async getWinnersAll(req, res){
+        try {
+            const winners = await ItemsModel.getWinnersAll()
+            return res.status(200).json({
+                message: "Winners All",
+                data: winners
+            })
+        } catch (error) {
+            return res.status(500).json({
+                message: "Internal Server Error",
+                error: error.message
+            })
         }
     }
 }

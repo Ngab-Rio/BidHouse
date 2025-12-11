@@ -1,4 +1,4 @@
-FROM node:22.10.0
+FROM node:22.20.0
 
 RUN apt-get update && apt-get install -y tzdata && \
     ln -snf /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \

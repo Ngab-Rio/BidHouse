@@ -13,6 +13,7 @@ app.use(express.urlencoded({ extended: true }));
 
 const allowedOrigins = [
   "http://localhost:4000",
+  "https://bidhouse.ngabrio.my.id"
 ]
 
 app.use(
@@ -43,6 +44,12 @@ app.use("/api/items", AuthMiddleware.verifyToken, require("./routes/items"))
 app.use("/api/bids", require("./routes/bids"))
 app.use("/api/winner", require("./routes/winner"))
 
-app.listen(port, () => {
-    console.log(`[+] Server Berjalan di http://${host}:${port}`)
-})
+if (process.env.NODE_ENV !== "test") {
+    const host = process.env.HOST || "localhost"
+    const port = process.env.PORT || 4000
+    app.listen(port, () => {
+        console.log(`[+] Server Berjalan di http://${host}:${port}`)
+    })
+}
+
+module.exports = app
